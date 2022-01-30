@@ -1,0 +1,47 @@
+
+services:
+  web:
+    container_name: contact_app_frontend
+    build: frontend/.
+    volumes:
+      - "appstate:/state"
+      - type: bind
+        source: frontend/app
+        target: /app
+    depends_on:
+      - database
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8085
+      - DEBUG=True
+      - DEV_TOOLS_PROPS_CHECK=True
+    ports:
+     - 8085:8085
+    deploy:
+      restart_policy:
+        condition: on-failure
+    
+  database:
+    container_name: contact_app_database
+    image: timescale/timescaledb:latest-pg14
+    environment:
+      - POSTGRES_PASSWORD=test_pass
+      - POSTGRES_USER=test_user
+      - POSTGRES_DB=contacts
+    volumes:
+      - "dbdata:/var/lib/postgresql/data"
+  
+  db_admin:
+    container_name: contact_app_db_dashboard
+    image: fenglc/pgadmin4
+    ports:
+      - 5050:5050
+    environment:
+      - DEFAULT_USER=murraywj@yahoo.com
+      - DEFAULT_PASSWORD=test_pass
+    depends_on:
+      - database
+
+volumes:
+  appstate:
+  dbdata:
